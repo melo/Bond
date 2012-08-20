@@ -52,11 +52,11 @@ sub dispatch_pending_msgs {
     last unless defined $addr;
 
     my $msg = $in->recv();
-    $msg = eval { decode_json($msg) };
+    $msg = eval { decode_json($msg->data) };
     ## FIXME: should we report bad messages?
     next unless $msg;
 
-    $self->dispatch_msg($msg, $addr);
+    $self->dispatch_msg($msg, $addr->data);
     $count++;
   }
 
