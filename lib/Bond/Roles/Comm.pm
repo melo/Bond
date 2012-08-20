@@ -92,6 +92,8 @@ sub _init_comm {
     die "FATAL: comm_type '$type' is not supported, ";
   }
 
+  $out->setsockopt(ZMQ_LINGER, 1000);
+  $in->setsockopt(ZMQ_LINGER,    1000);
   $in->setsockopt(ZMQ_SUBSCRIBE, '*');
   $in->setsockopt(ZMQ_SUBSCRIBE, $self->my_addr);
 }
