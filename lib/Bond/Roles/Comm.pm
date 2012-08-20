@@ -28,6 +28,10 @@ sub send_msg {
 
   die "Tried to send_msg() when comm_state is down" if $self->comm_state eq 'down';
 
+  if (my $reply_to = $args{reply_to}) {
+    $args{to} = $reply_to->{from};
+  }
+
   my $addr = $args{to}   || '*';
   my $type = $args{type} || die "Missing param 'type' on call to send_msg(),";
   my $body = $args{body} || {};
