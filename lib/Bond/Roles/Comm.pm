@@ -7,9 +7,10 @@ use namespace::autoclean;
 
 requires 'config', 'init', 'id', 'dispatch_msg';
 
+
 ## Addressing
 
-sub my_addr { my $self = shift; return join('.', $self->type, $self->id) }
+sub my_addr { my $self = shift; return join('.', $self->comm_type, $self->id) }
 
 
 ## Comm section
