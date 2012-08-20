@@ -3,6 +3,7 @@ package Bond::Roles::Comm;
 use Moo::Role;
 use ZeroMQ ':all';    ## ZeroMQ::Context and ZeroMQ::Socket
 use JSON 'encode_json', 'decode_json';
+use Proc::PidChange ':all';
 use namespace::autoclean;
 
 requires 'config', 'init', 'id', 'dispatch_msg';
@@ -23,7 +24,7 @@ has 'comm_state'    => (is => 'rwp', default => sub {'down'});
 
 sub send_msg {
   my ($self, %args) = @_;
-  $self->_pid_check;
+  check_current_pid() unless $Proc::PidChange::RT;
 
   die "Tried to send_msg() when comm_state is down" if $self->comm_state eq 'down';
 
@@ -42,7 +43,7 @@ sub send_msg {
 
 sub dispatch_pending_msgs {
   my ($self) = @_;
-  $self->_pid_check;
+  check_current_pid() unless $Proc::PidChange::RT;
 
   my $in    = $self->_in_sock;
   my $count = 0;
@@ -102,13 +103,6 @@ after 'init' => sub { shift->_init_comm };
 ## FIXME: hook DESTROY to make sure we cleanup
 
 
-## Fork protection
-has '_pid' => (is => 'rw', default => sub {$$});
 
-sub _pid_check {
-  my ($self) = @_;
-
-  $self->_init_comm() if $self->_pid != $$;
-}
 
 1;
