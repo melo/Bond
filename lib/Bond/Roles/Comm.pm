@@ -4,6 +4,7 @@ use Moo::Role;
 use ZeroMQ ':all';    ## ZeroMQ::Context and ZeroMQ::Socket
 use JSON 'encode_json', 'decode_json';
 use Proc::PidChange ':all';
+use Scalar::Util 'weaken';
 use namespace::autoclean;
 
 requires 'config', 'init', 'id', 'dispatch_msg';
@@ -107,9 +108,29 @@ sub _init_comm {
   }
 }
 
-after 'init' => sub { shift->_init_comm };
 
-## FIXME: hook DESTROY to make sure we cleanup
+{
+  my %cb;
+
+  before 'DEMOLISH' => sub {
+    my ($self) = @_;
+
+    unregister_pid_change_callback(delete $cb{$self}) if exists $cb{$self};
+
+    $self->_in_sock  && $self->_in_sock->close;
+    $self->_out_sock && $self->_out_sock->close;
+    $self->_comm_ctx && $self->_comm_ctx->term;
+  };
+
+  after 'init' => sub {
+    my $self = shift;
+
+    $self->_init_comm;
+
+    weaken($self);
+    register_pid_change_callback($cb{$self} = sub { $self->_init_comm if $self });
+  };
+}
 
 
 1;
