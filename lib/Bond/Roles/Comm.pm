@@ -77,9 +77,6 @@ sub _init_comm {
   if ($type eq 'agent' or $type eq 'client') {
     $in->connect($cfg->{out_addr});
     $out->connect($cfg->{in_addr});
-    $in->setsockopt(ZMQ_SUBSCRIBE, '*');
-    $in->setsockopt(ZMQ_SUBSCRIBE, $self->my_addr);
-    ## FIXME: set LINGER stuff
 
     $self->_set_comm_state('up');
 
@@ -88,14 +85,15 @@ sub _init_comm {
   elsif ($type eq 'controller') {
     $in->bind($cfg->{in_addr});
     $out->bind($cfg->{out_addr});
-    $in->setsockopt(ZMQ_SUBSCRIBE, '*');
-    ## FIXME: set LINGER stuff
 
     $self->_set_comm_state('up');
   }
   else {
     die "FATAL: comm_type '$type' is not supported, ";
   }
+
+  $in->setsockopt(ZMQ_SUBSCRIBE, '*');
+  $in->setsockopt(ZMQ_SUBSCRIBE, $self->my_addr);
 }
 
 after 'init' => sub { shift->_init_comm };
