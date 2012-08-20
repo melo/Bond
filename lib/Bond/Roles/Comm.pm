@@ -69,6 +69,10 @@ sub dispatch_pending_msgs {
 }
 
 
+## fd access
+sub comm_fd { shift->_in_sock->getsockopt(ZMQ_FD) }
+
+
 ## Initialization
 sub _init_comm {
   my ($self) = @_;
