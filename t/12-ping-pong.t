@@ -23,18 +23,26 @@ subtest 'ping pong protocol' => sub {
   while (deliver_messages($cntrl)) { $c-- }
   diag("Sync agents/controller, delta msg is $c");
 
-  ok($cntrl->send_msg(type => 'ping', body => 42), 'ping sent via controller');
+  ok($cntrl->send_msg(type => 'ping', body => { answer => 42 }), 'ping sent via controller');
 
   my $msg;
   ok($msg = deliver_messages($a1), 'got message on agent 1');
-  cmp_deeply($msg, { type => 'ping', from => $cntrl->my_addr, to => '*', body => 42 }, '... with the proper content');
+  cmp_deeply(
+    $msg,
+    { type => 'ping', from => $cntrl->my_addr, to => '*', body => { answer => 42 } },
+    '... with the proper content'
+  );
   ok($msg = deliver_messages($a2), 'got message on agent 2');
-  cmp_deeply($msg, { type => 'ping', from => $cntrl->my_addr, to => '*', body => 42 }, '... with the proper content');
+  cmp_deeply(
+    $msg,
+    { type => 'ping', from => $cntrl->my_addr, to => '*', body => { answer => 42 } },
+    '... with the proper content'
+  );
 
   ok($msg = deliver_messages($cntrl), 'controller gets one message back');
   cmp_deeply(
     $msg,
-    { type => 'pong', to => $cntrl->my_addr, from => re(qr{^agent\.a\d$}), body => 42 },
+    { type => 'pong', to => $cntrl->my_addr, from => re(qr{^agent\.a\d$}), body => { answer => 42 } },
     '... with the proper content'
   );
 };

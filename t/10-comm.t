@@ -15,7 +15,7 @@ subtest 'basic comm' => sub {
   my $agent = T::Comm->new(comm_type => 'agent',      config => $cfg, auto_register => 0);
   my $cntrl = T::Comm->new(comm_type => 'controller', config => $cfg, auto_register => 0);
 
-  $agent->send_msg(type => 'ping', body => 42);
+  $agent->send_msg(type => 'ping', body => { answer => 42 });
   my $count = 10;
   sleep(1) until $cntrl->dispatch_pending_msgs or 0 == $count--;
 
@@ -26,7 +26,7 @@ subtest 'basic comm' => sub {
     { type => 'ping',
       from => $agent->my_addr,
       to   => '*',
-      body => 42,
+      body => { answer => 42 },
     },
     '... with the expected content layout'
   );
